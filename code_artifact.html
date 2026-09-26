@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>♻️ 현이의 분리배출 대작전!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+        
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            font-family: 'Jua', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e0f7fa 0%, #fff9c4 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            font-size: 20px;
+        }
+
+        header {
+            width: 100%;
+            max-width: 1200px;
+            padding: 10px 20px;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 10px 0;
+            font-size: 2.8rem;
+            color: #2c3e50;
+            text-shadow: 2px 2px 0px #fff;
+        }
+
+        .status-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 25px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            gap: 20px;
+            border: 3px solid #b2ebf2;
+        }
+
+        .timer-wrapper {
+            flex-grow: 1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.8rem;
+            color: #d35400;
+        }
+
+        .timer-bg {
+            flex-grow: 1;
+            height: 30px;
+            background: #eee;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid #ccc;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            transition: width 1s linear, background-color 0.5s;
+        }
+
+        .ghost-counter {
+            font-size: 1.8rem;
+            color: #fff;
+            background: #8e44ad;
+            border: 3px solid #6c3483;
+            padding: 5px 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        main {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            flex-grow: 1;
+            gap: 20px;
+            padding: 15px 20px;
+        }
+
+        /* 왼쪽 패널: 캐릭터와 귀신 */
+        .left-panel {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            border: 4px dashed #95a5a6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .hyun-i-wrapper {
+            position: relative;
+            width: 120px;
+            height: 150px;
+        }
+
+        .character-svg {
+            width: 100%;
+            height: 100%;
+            animation: breathe 3s infinite ease-in-out;
+            z-index: 10;
+            position: relative;
+            filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+        }
+
+        @keyframes breathe {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+            100% { transform: translateY(0); }
+        }
+
+        /* 회색 털뭉치 귀신 스타일 */
+        .ghost {
+            position: absolute;
+            width: 40px; height: 40px;
+            background: #999;
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border: 2px solid #777;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1;
+            transition: all 0.5s ease;
+            animation: float 2s infinite ease-in-out alternate;
+            font-size: 1.2rem;
+        }
+        .ghost::after { content: '👀'; }
+        
+        @keyframes float {
+            from { transform: translateY(0px) rotate(-5deg); }
+            to { transform: translateY(-10px) rotate(5deg); }
+        }
+
+        /* 오른쪽 패널: 멘트와 쓰레기 등장 */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 15px;
+        }
+
+        #speech-bubble {
+            background: #fff;
+            border: 5px solid #3498db;
+            border-radius: 20px;
+            padding: 20px;
+            font-size: 1.8rem;
+            color: #2c3e50;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            word-break: keep-all;
+        }
+
+        .trash-container {
+            flex-grow: 1;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            border: 5px solid #f1c40f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        #trash-stage {
+            width: 220px;
+            height: 220px;
+            background: #fff;
+            border-radius: 50%;
+            border: 5px dashed #f39c12;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .trash-item {
+            font-size: 8rem;
+            cursor: pointer;
+            filter: drop-shadow(5px 10px 5px rgba(0,0,0,0.3));
+            transition: transform 0.2s;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 50;
+        }
+        .trash-item.selected {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 25px #f1c40f);
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0) rotate(-20deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .trash-name {
+            font-size: 2.2rem;
+            background: #fff;
+            padding: 10px 30px;
+            border-radius: 20px;
+            border: 3px solid #333;
+            color: #333;
+            text-align: center;
+            word-break: keep-all;
+        }
+
+        footer {
+            width: 100%;
+            background: #fff;
+            padding: 20px 0;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            z-index: 20;
+        }
+
+        #bins-area {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .bin {
+            width: 200px;
+            height: 180px;
+            border-radius: 15px 15px 30px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+            transition: all 0.2s;
+            background: #fff;
+            border: 8px solid;
+            border-top-width: 50px;
+        }
+
+        #bin-paper { border-color: #27ae60; }
+        #bin-plastic { border-color: #f1c40f; }
+        #bin-glass { border-color: #e74c3c; }
+        #bin-can { border-color: #795548; }
+
+        .bin:hover, .bin.hovered {
+            transform: translateY(-15px) scale(1.05);
+            box-shadow: 0 20px 25px rgba(0,0,0,0.3);
+        }
+
+        #result-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 999;
+            align-items: center; justify-content: center; flex-direction: column;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white; padding: 40px; border-radius: 30px; max-width: 700px; text-align: center;
+            box-shadow: 0 0 40px rgba(255,255,255,0.4);
+        }
+
+        .modal-content h2 { font-size: 3.5rem; margin: 0 0 15px; }
+        .modal-content p { font-size: 1.8rem; margin: 10px 0; text-align: left; line-height: 1.4; }
+        
+        button {
+            font-size: 2.2rem; padding: 15px 50px;
+            background: #3498db; color: white; border: none; border-radius: 20px;
+            cursor: pointer; margin-top: 30px; transition: 0.2s;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+        }
+        button:hover { background: #2980b9; transform: scale(1.05); }
+
+        @media (max-width: 900px) {
+            main { flex-direction: column; }
+            .left-panel { padding: 40px 0; min-height: 250px; }
+            .bin { width: 90px; height: 120px; font-size: 1.5rem; border-top-width: 30px; }
+            .trash-item { font-size: 6rem; }
+            h1 { font-size: 2.2rem; }
+            .ghost-counter { font-size: 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>♻️ 현이의 분리배출 대작전 ♻️</h1>
+        <div class="status-panel">
+            <div class="timer-wrapper">
+                ⏱️
+                <div class="timer-bg">
+                    <div class="timer-bar" id="timer-bar"></div>
+                </div>
+            </div>
+            <div class="ghost-counter" id="ghost-counter-display">
+                남은 귀신: 👻 15마리
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="left-panel">
+            <div class="hyun-i-wrapper" id="avatar-container">
+                <!-- 현이 캐릭터 SVG (까만 뽀글머리, 회색 체크 셔츠, 짙은 반바지) -->
+                <svg class="character-svg" viewBox="0 0 120 150" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <pattern id="checkers" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+                            <rect width="10" height="10" fill="#d5d8dc" />
+                            <rect width="5" height="5" fill="#aab7b8" />
+                            <rect x="5" y="5" width="5" height="5" fill="#aab7b8" />
+                        </pattern>
+                    </defs>
+                    <!-- 뒷머리 -->
+                    <circle cx="60" cy="45" r="40" fill="#222"/>
+                    <!-- 다리 & 바지 -->
+                    <rect x="45" y="110" width="10" height="20" fill="#ffe0bd" rx="4"/>
+                    <rect x="65" y="110" width="10" height="20" fill="#ffe0bd" rx="4"/>
+                    <path d="M 38,90 L 82,90 L 85,115 L 60,110 L 35,115 Z" fill="#1a252c" />
+                    <!-- 신발 -->
+                    <ellipse cx="50" cy="135" rx="12" ry="7" fill="#333"/>
+                    <ellipse cx="70" cy="135" rx="12" ry="7" fill="#333"/>
+                    <!-- 몸통 (체크 셔츠) -->
+                    <rect x="35" y="65" width="50" height="40" rx="15" fill="url(#checkers)"/>
+                    <!-- 팔 -->
+                    <path d="M 40,75 Q 20,90 25,105" stroke="url(#checkers)" stroke-width="12" stroke-linecap="round" fill="none"/>
+                    <path d="M 80,75 Q 100,90 95,105" stroke="url(#checkers)" stroke-width="12" stroke-linecap="round" fill="none"/>
+                    <circle cx="25" cy="105" r="6" fill="#ffe0bd"/>
+                    <circle cx="95" cy="105" r="6" fill="#ffe0bd"/>
+                    <!-- 얼굴 -->
+                    <circle cx="60" cy="45" r="30" fill="#ffe0bd"/>
+                    <!-- 앞머리 (뽀글) -->
+                    <circle cx="35" cy="15" r="15" fill="#222"/>
+                    <circle cx="55" cy="10" r="18" fill="#222"/>
+                    <circle cx="75" cy="12" r="16" fill="#222"/>
+                    <circle cx="85" cy="25" r="15" fill="#222"/>
+                    <circle cx="30" cy="30" r="15" fill="#222"/>
+                    <circle cx="25" cy="45" r="12" fill="#222"/>
+                    <circle cx="95" cy="40" r="14" fill="#222"/>
+                    <!-- 눈 -->
+                    <ellipse cx="48" cy="48" rx="6" ry="8" fill="#111"/>
+                    <circle cx="49" cy="45" r="2.5" fill="#fff"/>
+                    <ellipse cx="72" cy="48" rx="6" ry="8" fill="#111"/>
+                    <circle cx="73" cy="45" r="2.5" fill="#fff"/>
+                    <!-- 볼터치 -->
+                    <ellipse cx="38" cy="58" rx="7" ry="4" fill="#ff7675" opacity="0.8"/>
+                    <ellipse cx="82" cy="58" rx="7" ry="4" fill="#ff7675" opacity="0.8"/>
+                    <!-- 입 -->
+                    <path d="M 55,58 Q 60,65 65,58" stroke="#555" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div id="speech-bubble">쓰레기를 누르고 <b>알맞은 쓰레기통</b>에 버려줘!</div>
+            
+            <div class="trash-container">
+                <div id="trash-stage"></div>
+                <div class="trash-name" id="trash-name-display">준비 중...</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div id="bins-area">
+            <div class="bin" id="bin-paper" data-type="paper">종이</div>
+            <div class="bin" id="bin-plastic" data-type="plastic">플라스틱</div>
+            <div class="bin" id="bin-glass" data-type="glass">유리</div>
+            <div class="bin" id="bin-can" data-type="can">캔·고철</div>
+        </div>
+    </footer>
+
+    <div id="result-modal">
+        <div class="modal-content">
+            <h2 id="modal-title" style="color: #2ecc71;">🎉 작전 대성공! 🎉</h2>
+            <p id="modal-desc">모든 쓰레기 귀신이 정화되었어!<br>이제 현이는 분리배출 마스터야!</p>
+            <hr style="margin:20px 0; border: 1px solid #eee;">
+            <h3 style="font-size: 2.2rem; color: #34495e;">📝 오늘의 분리배출 배움 노트</h3>
+            <p>✅ <b>종이:</b> 테이프 떼고, 반듯하게 접어서!</p>
+            <p>✅ <b>플라스틱:</b> 내용물 씻고, 라벨은 떼서!</p>
+            <p>✅ <b>유리:</b> 안 깨지게 조심, 뚜껑은 따로!</p>
+            <p>✅ <b>캔·고철:</b> 내용물 비우고 찌그러뜨려서!</p>
+            <button onclick="location.reload()">다시 연습하기</button>
+        </div>
+    </div>
+
+    <!-- 폭죽 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
+    <script>
+        let totalTime = 180;
+        let timeLeft = 180;
+        let timerInterval;
+        let ghostCount = 15;
+        let ghosts = [];
+
+        // 힌트가 자연스럽게 들어간 15가지 쓰레기 데이터
+        const allTrash = [
+            { icon: "📰", type: "paper", name: "반듯하게 편 신문지" },
+            { icon: "🧴", type: "plastic", name: "내용물을 비운 샴푸통" },
+            { icon: "🍷", type: "glass", name: "내용물을 비운 와인병" },
+            { icon: "🥫", type: "can", name: "다 먹은 통조림 캔" },
+            { icon: "📦", type: "paper", name: "테이프를 뗀 택배 상자" },
+            { icon: "🥡", type: "plastic", name: "씻어서 말린 배달 용기" },
+            { icon: "🍾", type: "glass", name: "깨끗이 씻은 주스병" },
+            { icon: "🥤", type: "plastic", name: "라벨을 뗀 페트병" },
+            { icon: "📖", type: "paper", name: "더 이상 안 보는 헌책" },
+            { icon: "🐟", type: "can", name: "기름을 비운 참치캔" },
+            { icon: "🧃", type: "paper", name: "씻어서 펼친 우유팩" },
+            { icon: "🧼", type: "plastic", name: "깨끗이 씻은 린스통" },
+            { icon: "🫙", type: "glass", name: "기름기를 닦은 참기름병" },
+            { icon: "🥫", type: "can", name: "납작하게 찌그러뜨린 음료수 캔" },
+            { icon: "📄", type: "paper", name: "스테이플러 심을 뺀 전단지" }
+        ];
+
+        const praiseMessages = [
+            "잘했어! 넌 분리배출 왕이야!✨",
+            "대단해! 귀신이 하나 더 사라졌어! 👻💨",
+            "환경 지킴이 인정! 🌍",
+            "완벽해! 현이 몸이 가벼워지고 있어! 🏃‍♂️",
+            "최고야! 이렇게만 하면 지구도 건강해질 거야! 💚"
+        ];
+        const failMessage = "앗, 거기가 아니야! 다시 한 번 잘해봐! 🥲";
+
+        let currentTrashIndex = 0;
+        let selectedTrash = null;
+
+        const stage = document.getElementById('trash-stage');
+        const nameDisplay = document.getElementById('trash-name-display');
+        const speechBubble = document.getElementById('speech-bubble');
+        const avatarContainer = document.getElementById('avatar-container');
+        const ghostCounterDisplay = document.getElementById('ghost-counter-display');
+        const timerBar = document.getElementById('timer-bar');
+
+        function createGhosts() {
+            for(let i=0; i<15; i++) {
+                let g = document.createElement('div');
+                g.className = 'ghost';
+                
+                let angle = (i / 15) * Math.PI * 2;
+                let radius = 70 + Math.random() * 40; 
+                let x = Math.cos(angle) * radius + 40; 
+                let y = Math.sin(angle) * radius + 55; 
+                
+                g.style.left = x + 'px';
+                g.style.top = y + 'px';
+                g.style.animationDelay = (Math.random() * 2) + 's'; 
+                
+                avatarContainer.appendChild(g);
+                ghosts.push(g);
+            }
+        }
+
+        function initGame() {
+            createGhosts();
+            timerInterval = setInterval(updateTimer, 1000);
+            spawnTrash();
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            const percentage = (timeLeft / totalTime) * 100;
+            timerBar.style.width = percentage + '%';
+            
+            if(percentage < 30) timerBar.style.background = '#e74c3c'; 
+            else if(percentage < 60) timerBar.style.background = '#f1c40f'; 
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                const modal = document.getElementById('result-modal');
+                document.getElementById('modal-title').innerText = '⏰ 시간 초과!';
+                document.getElementById('modal-title').style.color = '#e74c3c';
+                document.getElementById('modal-desc').innerHTML = '아쉽지만 시간이 다 되었어요.<br>다시 도전해볼까요?';
+                modal.style.display = 'flex';
+            }
+        }
+
+        function spawnTrash() {
+            stage.innerHTML = '';
+            selectedTrash = null;
+
+            if (currentTrashIndex >= allTrash.length) {
+                gameClear();
+                return;
+            }
+
+            const data = allTrash[currentTrashIndex];
+            const tEl = document.createElement('div');
+            tEl.className = 'trash-item';
+            tEl.innerText = data.icon;
+            tEl.dataset.type = data.type;
+            
+            tEl.draggable = true;
+            tEl.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', data.type);
+                selectTrash(tEl);
+            });
+            tEl.addEventListener('click', () => selectTrash(tEl));
+
+            stage.appendChild(tEl);
+            nameDisplay.innerText = data.name;
+        }
+
+        function selectTrash(el) {
+            if(selectedTrash) selectedTrash.classList.remove('selected');
+            selectedTrash = el;
+            selectedTrash.classList.add('selected');
+            speechBubble.innerHTML = "이 쓰레기는 <b>어느 통</b>에 들어가야 할까?";
+            speechBubble.style.borderColor = "#f1c40f";
+        }
+
+        function handleDrop(binType) {
+            if (!selectedTrash) return;
+
+            if (selectedTrash.dataset.type === binType) {
+                playSuccessSound();
+                
+                // 랜덤 칭찬 멘트
+                const randomMsg = praiseMessages[Math.floor(Math.random() * praiseMessages.length)];
+                speechBubble.innerHTML = `<b>${randomMsg}</b>`;
+                speechBubble.style.borderColor = "#2ecc71";
+                
+                ghostCount--;
+                ghostCounterDisplay.innerHTML = `남은 귀신: 👻 ${ghostCount}마리`;
+                if(ghosts.length > 0) {
+                    let g = ghosts.pop();
+                    g.style.transform = 'scale(0)';
+                    g.style.opacity = '0';
+                    setTimeout(() => g.remove(), 500);
+                }
+
+                currentTrashIndex++;
+                stage.innerHTML = '<div style="font-size:5rem">💨</div>'; 
+                setTimeout(spawnTrash, 1200);
+            } else {
+                playFailSound();
+                speechBubble.innerHTML = `<b>${failMessage}</b>`;
+                speechBubble.style.borderColor = "#e74c3c";
+                selectedTrash.classList.remove('selected');
+                selectedTrash = null;
+            }
+        }
+
+        document.querySelectorAll('.bin').forEach(bin => {
+            bin.addEventListener('click', () => handleDrop(bin.dataset.type));
+            bin.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                bin.classList.add('hovered');
+            });
+            bin.addEventListener('dragleave', () => bin.classList.remove('hovered'));
+            bin.addEventListener('drop', (e) => {
+                e.preventDefault();
+                bin.classList.remove('hovered');
+                handleDrop(bin.dataset.type);
+            });
+        });
+
+        function gameClear() {
+            clearInterval(timerInterval);
+            speechBubble.innerHTML = "대단해! 쓰레기 귀신을 모두 쫓아냈어! 🎉";
+            nameDisplay.innerText = "작전 완료!";
+            
+            var duration = 4 * 1000;
+            var end = Date.now() + duration;
+            (function frame() {
+                confetti({ particleCount: 7, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#2ecc71', '#f1c40f', '#e74c3c', '#3498db'] });
+                confetti({ particleCount: 7, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#2ecc71', '#f1c40f', '#e74c3c', '#3498db'] });
+                if (Date.now() < end) requestAnimationFrame(frame);
+            }());
+
+            setTimeout(() => {
+                document.getElementById('result-modal').style.display = 'flex';
+            }, 1500);
+        }
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSuccessSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        function playFailSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
